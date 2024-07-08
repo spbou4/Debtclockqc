@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quebec Debt Clock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .debt-clock {
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        .debt-amount {
+            font-size: 2em;
+            color: red;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="debt-clock">
+        <h1>Quebec's Provincial Debt</h1>
+        <div class="debt-amount" id="debt-amount">$236,528,249,153.16</div>
+        <p id="share">Your Share: $26,916.00</p>
+    </div>
+
+    <script>
+        const population = 8600000; // Population of Quebec
+        const initialDebt = 236528249153.16; // Initial debt amount in dollars
+        const incrementBase = 8500; // Base increment amount in dollars
+        const initialDebtTimestamp = new Date('2024-07-08T04:30:00').getTime(); // Timestamp for the initial debt
+
+        function formatNumber(num) {
+            return num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        }
+
+        function getCurrentDebt() {
+            const currentTimestamp = Date.now();
+            const timeElapsed = currentTimestamp - initialDebtTimestamp;
+            const incrementsElapsed = Math.floor(timeElapsed / 15000); // 15 seconds intervals
+            const totalIncrement = incrementsElapsed * incrementBase;
+            return initialDebt + totalIncrement;
+        }
+
+        function updateDebt() {
+            let debt = parseFloat(localStorage.getItem('currentDebt')) || getCurrentDebt();
+
+            // Increase the debt by a random amount between 90% and 110% of incrementBase every 15 seconds
+            const randomFactor = Math.random() * 0.2 + 0.9; // Random factor between 0.9 and 1.1
+            const increment = incrementBase * randomFactor;
+            debt += increment;
+
+            // Calculate the share per person
+            const share = debt / population;
+
+            // Update the displayed debt amount
+            document.getElementById('debt-amount').textContent = formatNumber(debt);
+            document.getElementById('share').textContent = `Your Share: ${formatNumber(share)}`;
+
+            // Save the current debt in localStorage
+            localStorage.setItem('currentDebt', debt);
+
+            // Schedule the next update
+            setTimeout(updateDebt, 15000); // Update every 15 seconds
+        }
+
+        // Start the debt clock updates
+        updateDebt();
+    </script>
+</body>
+</html>
